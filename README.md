@@ -38,3 +38,10 @@ It uses a team of specialized agents that gather, process, and summarize data ac
 - **dotenv** for environment management
 
 ## 📂 Project Structure
+├── .python-version
+├── main.py # Orchestrator entrypoint
+├── pyproject.toml # Project configuration
+├── README.md # Project documentation
+├── requirements.txt # Python dependencies
+├── tools_agents.py # Agent tools (e.g., Tavily search)
+├── uv # UV package manager config
