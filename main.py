@@ -8,6 +8,8 @@ from agents import (
     handoff,
     set_tracing_disabled,
     ModelSettings,
+    RunContextWrapper,
+    SQLiteSession
 )
 from dotenv import load_dotenv
 from tools_agents import (
@@ -68,15 +70,12 @@ Instructions:
 - Output a final report in natural language with these sections:  
   1. **Prediction**: Probability percentages for each country.  
   2. Output prediction is in following formate:
-  Country1: 10%
-  Country2: 90%
-
+  Country1: 90%
+  Country2: 10%
 
 Your goal is to provide the User with a clear, well-structured, and properly sourced prediction report.
-"""
-#   2. **Strengths & Weaknesses**: Key comparative insights.  
-#   3. **Reasoning**: Explanation of how evidence supports the outcome.  
-#   4. **Citations**: Reliable sources provided by the Citations Agent.  
+""" 
+
 prediction_agent = Agent(
     model=gpt_llm,
     name="Prediction Agent",
@@ -90,10 +89,12 @@ prediction_agent = Agent(
     ],
     model_settings=ModelSettings(temperature=0.2),
 )
+
 instructions = """
 You are the Planning Agent.  
 Your job is to receive the countries and share the following research plan for Predicting the outcome of a potential conflict between these two countries.  
-**important** After making plan → handoff to Prediction Agent
+
+**important** After making plan → handoff to 'Prediction Agent'
 
 Plan:
 Military Data → Collects Global Firepower data.
@@ -108,6 +109,7 @@ Do Prediction → Outputs:
 
 """
 
+
 planning_agent = Agent(
     model=gimini_llm,
     name="Planning Agent",
@@ -118,45 +120,74 @@ planning_agent = Agent(
     handoffs=[handoff(prediction_agent)],
 )
 # Requment gatyhering Agent
+# instructions = """
+# You are the Requirement Gathering Agent.  
+# Your job is to interact with the user and collect the names of two countries that they want to compare in a conflict scenario.  
+
+# Instructions:  
+# - Ask the user for two country names if they are not provided. 
+# - Once you have both names, return them strictly in this JSON object format (and nothing else):  
+
+# {
+#   "country1": "CountryA",
+#   "country2": "CountryB"
+# }
+
+# - Do not include explanations, natural language text, or analysis.  
+# - HandOff the collected information to the Planning Agent.
+# """
 instructions = """
 You are the Requirement Gathering Agent.  
-Your job is to interact with the user and collect the names of two countries that they want to compare in a conflict scenario.  
+You are a friendly agent.
 
-Instructions:  
-- Ask the user for two country names if they are not provided. 
-- Once you have both names, structure them into JSON format:  
-  {"country1": "CountryA", "country2": "CountryB"}  
-- Do not proceed with analysis.  
-- HandOff the collected information to the Planning Agent.
+Project Context:
+We are building a Conflict Prediction System.  
+The system will compare two countries in a hypothetical conflict scenario, 
+and later other agents will analyze military strength, economy, public sentiment, 
+and other resources to predict possible outcomes. 
+
+Rules:
+- If neither country is provided, ask for both.  
+- If only one country is provided, ask for the missing one.  
+- Once both countries are collected, handoff to Planning Agent in JSON format like this:  
+{
+  "country1": "CountryA",
+  "country2": "CountryB"
+}
+
+- Do not include explanations or extra text.  
+- When both countries are present, stop asking questions and hand off to the Planning Agent.
 """
-
 
 class RequirementInput(BaseModel):
     country1: str = Field(default=None, description="Name of the first country")
     country2: str = Field(default=None, description="Name of the second country")
 
+async def on_handoff(ctx: RunContextWrapper[None], input_data: RequirementInput):
+    return {"country1":input_data.country1,"country2":input_data.country2}
 
 RequirementGatheringAgent = Agent(
-    model=gimini_llm,
+    model=gpt_llm,
     name="Requirement Gathering Agent",
-    instructions=f"""{RECOMMENDED_PROMPT_PREFIX}
-                {instructions}
-                """,
+    instructions=instructions,
     model_settings=ModelSettings(temperature=0.2),
-    # output_type=RequirementInput,
-    handoffs=[handoff(planning_agent)],
+    handoffs=[handoff(planning_agent,input_type=RequirementInput,on_handoff=on_handoff)],
 )
-
-
 async def main():
+    session = SQLiteSession("conversations.db") 
 
-    # Pass JSON to Military Data Agent
-    user_input = "India and Pakistan"
+    print("👋 Welcome! Which two countries do you want to compare?")
+    while True:
+        user_input = input("You: ")
+        response = await Runner.run(
+            RequirementGatheringAgent,
+            user_input,
+            session=session 
+        )
+        print("🤖 Agent:", response.final_output)
+        if response.last_agent.name not in ("Requirement Gathering Agent","Planning Agent"):
+            break
 
-    # Pass JSON to Military Data Agent
-    response = await Runner.run(RequirementGatheringAgent, user_input)
-    print(response.final_output)
-
-
+import asyncio
 if __name__ == "__main__":
     asyncio.run(main())
