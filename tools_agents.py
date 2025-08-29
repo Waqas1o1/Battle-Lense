@@ -10,6 +10,7 @@ from agents import (
 )
 from dotenv import load_dotenv
 from tavily import TavilyClient
+from pydantic import BaseModel
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -32,6 +33,15 @@ llm_model = OpenAIChatCompletionsModel(
 
 client: TavilyClient = TavilyClient(TAVILY_API_KEY)
 
+class ProgressInput(BaseModel):
+    percentage: int
+    status: str
+
+@function_tool
+def progress_tool_fn(input_data: ProgressInput, ctx):
+    print(f"📊 Progress: {input_data.percentage}% - {input_data.status}")
+    return {"ok": True, "progress": input_data.percentage, "status": input_data.status}
+
 
 @function_tool
 def tavily_search(query: str) -> dict:
@@ -49,25 +59,6 @@ agent = Agent(
     tools=[tavily_search],
     model_settings=ModelSettings(temperature=0.2),
 )
-# instructions="""
-#                 You are the Military Data Agent.
-#                 Your role is to gather and summarize reliable information about the military strength of two countries.
-
-#                 Your tasks:
-#                 1. Collect and compare the following data points for both countries:
-#                 - Active military personnel
-#                 - Reserve forces
-#                 - Land power (tanks, artillery, armored vehicles)
-#                 - Air power (fighters, bombers, helicopters, drones)
-#                 - Naval power (aircraft carriers, destroyers, submarines)
-#                 - Missile and nuclear capabilities (if available)
-#                 - Annual defense budget
-#                 - Notable alliances or defense treaties
-#                 2. Use only credible and up-to-date sources (e.g., SIPRI, Global Firepower, government reports, reputable news).
-#                 3. Present the data in a **structured comparison format**, highlighting key strengths and weaknesses for each country.
-#                 4. If some data is missing, note it clearly instead of inventing.
-#                 5. Return your output in a way the Prediction can combine it with Economy, Sentiment, and Reflection data.
-#             """,
 
 instructions = """
 You are the Military Data Agent.  

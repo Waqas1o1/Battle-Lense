@@ -9,7 +9,7 @@ from agents import (
     set_tracing_disabled,
     ModelSettings,
     RunContextWrapper,
-    SQLiteSession
+    SQLiteSession,
 )
 from dotenv import load_dotenv
 from tools_agents import (
@@ -18,12 +18,14 @@ from tools_agents import (
     sentiment_data_Agent,
     ReflectionAgent,
     CitationsAgent,
+    progress_tool_fn
 )
 from agents.extensions.handoff_prompt import RECOMMENDED_PROMPT_PREFIX
 from pydantic import BaseModel, Field
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 # 🌿 Load environment variables
 load_dotenv()
 set_tracing_disabled(disabled=False)
@@ -45,11 +47,14 @@ gpt_llm = OpenAIChatCompletionsModel(
 )
 
 
+
 instructions = """
 You are the Lead Prediction Agent (Orchestrator).  
 Your role is to coordinate the research process and produce a fair, well-reasoned conflict outcome prediction.  
 
 Instructions:  
+- Always keep the user updated about progress using progress_tool_fn. 
+- Before calling each data tool like Military, Economy, Sentiment, call `Progress Tool` with percentage and status.  
 - Call every tool → military_data_agent, economic_data_agent, sentiment_data_agent Agent only one time
 - Call ReflectionAgent and CitationsAgent as many time as you need.
 - Accept structured input from the Planning Agent (countries + research plan).  
@@ -81,11 +86,12 @@ prediction_agent = Agent(
     name="Prediction Agent",
     instructions=instructions,
     tools=[
+        progress_tool_fn,
         military_data_Agent,
         economic_data_Agent,
         sentiment_data_Agent,
         CitationsAgent,
-        ReflectionAgent,
+        ReflectionAgent
     ],
     model_settings=ModelSettings(temperature=0.2),
 )
@@ -119,23 +125,7 @@ planning_agent = Agent(
                 """,
     handoffs=[handoff(prediction_agent)],
 )
-# Requment gatyhering Agent
-# instructions = """
-# You are the Requirement Gathering Agent.  
-# Your job is to interact with the user and collect the names of two countries that they want to compare in a conflict scenario.  
 
-# Instructions:  
-# - Ask the user for two country names if they are not provided. 
-# - Once you have both names, return them strictly in this JSON object format (and nothing else):  
-
-# {
-#   "country1": "CountryA",
-#   "country2": "CountryB"
-# }
-
-# - Do not include explanations, natural language text, or analysis.  
-# - HandOff the collected information to the Planning Agent.
-# """
 instructions = """
 You are the Requirement Gathering Agent.  
 You are a friendly agent.
