@@ -62,10 +62,10 @@ uv pip install -r requirements.txt
 
 
 3. **Setup environment variables**
-OPENAI_API_KEY=your_openai_key
-OPENAI_API_KEY_2=your_secondary_openai_key
-GEMINI_API_KEY=your_google_gemini_key
-TAVILY_API_KEY=your_tavily_api_key
+- OPENAI_API_KEY=your_openai_key
+- OPENAI_API_KEY_2=your_secondary_openai_key
+- GEMINI_API_KEY=your_google_gemini_key
+- TAVILY_API_KEY=your_tavily_api_key
 
 ## ▶️ Usage
 uv run main.py
