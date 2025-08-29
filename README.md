@@ -27,7 +27,6 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 ---
 
 ## 📂 Project Structure
-- ├── .python-version # Python version lock 
 - ├── main.py # Orchestrator entrypoint
 - ├── pyproject.toml # Project configuration
 - ├── README.md # Project documentation
@@ -40,12 +39,13 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 ## 🔑 Requirements
 - Python **3.9+**
 - Dependencies:
-  - `openai-agents`
-  - `openai`
-  - `tavily-python`
-  - `python-dotenv`
+  - `openai>=1.100.2`
+  - `openai-agents>=0.2.8`
+  - `python-dotenv>=1.1.1`
+  - `ruff>=0.12.9`
+  - `tavily-python>=0.7.11`
 
-(Already listed in `requirements.txt`)
+(Already listed in `pyproject.toml`)
 
 ---
 
