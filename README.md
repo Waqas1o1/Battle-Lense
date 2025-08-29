@@ -27,25 +27,23 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 ---
 
 ## 📂 Project Structure
-├── .python-version # Python version lock
-├── main.py # Orchestrator entrypoint
-├── pyproject.toml # Project configuration
-├── README.md # Project documentation
-├── requirements.txt # Python dependencies
-├── tools_agents.py # Agent tools (Tavily search, Military, Economic, Sentiment, etc.)
-└── uv # UV package manager config
+- ├── .python-version # Python version lock 
+- ├── main.py # Orchestrator entrypoint
+- ├── pyproject.toml # Project configuration
+- ├── README.md # Project documentation
+- ├── requirements.txt # Python dependencies
+- ├── tools_agents.py # Agent tools (Tavily search, Military, Economic, Sentiment, etc.)
+- └── uv # UV package manager config
 
 ---
 
 ## 🔑 Requirements
 - Python **3.9+**
 - Dependencies:
+  - `openai-agents`
   - `openai`
   - `tavily-python`
   - `python-dotenv`
-  - `pydantic`
-  - `asyncio`
-  - `sqlite`
 
 (Already listed in `requirements.txt`)
 
@@ -55,7 +53,7 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/conflict-prediction-system.git
+   git clone https://github.com/Waqas1o1/Battle-Lense.git
    cd conflict-prediction-system
 
 2. **Install dependencies**
@@ -72,7 +70,7 @@ TAVILY_API_KEY=your_tavily_api_key
 ## ▶️ Usage
 uv run main.py
 
-# Example interaction:
+### Example interaction:
 👋 Welcome! Which two countries do you want to compare?
 You: USA and China
 🤖 Agent: Prediction Report generated...

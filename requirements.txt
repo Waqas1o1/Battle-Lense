@@ -1,3 +1,4 @@
+tavily-pytho
 python-dotenv
 openai-agents
 openai
