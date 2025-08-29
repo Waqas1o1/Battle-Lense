@@ -1,47 +1,91 @@
-"# Battle-Lense" 
-# Conflict Outcome Prediction System
+# ⚔️🌍⚔️ BattleLense – Conflict Prediction System
 
-This project is an **AI-driven research and analysis framework** designed to predict the outcome of conflicts between two countries.  
-It uses a team of specialized agents that gather, process, and summarize data across different domains such as military strength, economy, sentiment, and political stability.  
+An **AI-driven multi-agent system** that predicts the possible outcome of a hypothetical conflict between two countries.  
+It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a custom **orchestration framework** to gather military, economic, and sentiment data, analyze contradictions, and provide a well-reasoned prediction report with citations.
 
-## 🔍 Key Features
-- **Multi-Agent Architecture**: Each agent has a well-defined role (Military, Economic, Sentiment, etc.).
-- **Real-World Data via Tavily**: Agents use the `tavily_search` tool to gather factual, up-to-date information from the internet.
-- **Structured Outputs**: All agents return results in structured JSON, making it easy to process and feed into the Orchestrator.
-- **Synthetic Data Option**: The system can also generate **fake but realistic data** for testing without hitting external APIs.
-- **Prediction Orchestration**: An Orchestrator Agent coordinates data collection, compares findings, and produces a final conflict outcome prediction.
+---
 
-## 🧩 Agents Overview
-### 1. **Sentiment Data Agent**
-- Collects public morale, protests, political stability, and recent news sentiment.
-- Uses one Tavily call **per country**.
-- Returns concise JSON summaries.
+## 🚀 Features
+- **Multi-Agent Architecture**:
+  - 📊 **Requirement Gathering Agent** – Collects countries for comparison.  
+  - 🗺 **Planning Agent** – Generates a structured research plan.  
+  - 🎯 **Prediction Agent (Orchestrator)** – Synthesizes results into conflict outcome probabilities.  
+  - 🪖 **Military Data Agent** – Fetches and summarizes military strength.  
+  - 💰 **Economic Data Agent** – Analyzes GDP, defense spending, and resilience.  
+  - 📰 **Sentiment Data Agent** – Evaluates public morale, stability, and protests.  
+  - 📚 **Citations Agent** – Compiles reliable sources for transparency.  
+  - 🔎 **Reflection Agent** – Ensures logical consistency and balanced reasoning.  
 
-### 2. **Economic Data Agent**
-- Gathers GDP, defense spending, trade balance, resources, and wartime resilience.
-- Uses one Tavily call **per country**.
-- Provides a structured comparison of economic sustainability.
+- **Weighted Scoring Model**:  
+  - Military Strength = **40%**  
+  - Economy & Resources = **30%**  
+  - Public Sentiment = **20%**  
+  - Geography/Allies (qualitative) = **10%**  
 
-### 3. **Military Data Agent**
-- (Planned/Implemented) Collects data on army size, airforce, navy, nuclear capability, and defense budget.
-- Structured in JSON for easy comparison.
+- **Interactive CLI** – Users provide two countries, and the system outputs a structured prediction.
 
-### 4. **Orchestrator Agent**
-- Coordinates all sub-agents.
-- Compiles results into a unified prediction of conflict outcomes.
-
-## ⚙️ Tech Stack
-- **Python 3.10+**
-- **Async Agent Framework** (custom agents with cloning and tools integration)
-- **Tavily API** for real-world search
-- **pydantic** for structured data models
-- **dotenv** for environment management
+---
 
 ## 📂 Project Structure
-├── .python-version
+├── .python-version # Python version lock
 ├── main.py # Orchestrator entrypoint
 ├── pyproject.toml # Project configuration
 ├── README.md # Project documentation
 ├── requirements.txt # Python dependencies
-├── tools_agents.py # Agent tools (e.g., Tavily search)
-├── uv # UV package manager config
+├── tools_agents.py # Agent tools (Tavily search, Military, Economic, Sentiment, etc.)
+└── uv # UV package manager config
+
+---
+
+## 🔑 Requirements
+- Python **3.9+**
+- Dependencies:
+  - `openai`
+  - `tavily-python`
+  - `python-dotenv`
+  - `pydantic`
+  - `asyncio`
+  - `sqlite`
+
+(Already listed in `requirements.txt`)
+
+---
+
+## ⚙️ Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/conflict-prediction-system.git
+   cd conflict-prediction-system
+
+2. **Install dependencies**
+pip install uv
+uv pip install -r requirements.txt
+
+
+3. **Setup environment variables**
+OPENAI_API_KEY=your_openai_key
+OPENAI_API_KEY_2=your_secondary_openai_key
+GEMINI_API_KEY=your_google_gemini_key
+TAVILY_API_KEY=your_tavily_api_key
+
+## ▶️ Usage
+uv run main.py
+
+# Example interaction:
+👋 Welcome! Which two countries do you want to compare?
+You: USA and China
+🤖 Agent: Prediction Report generated...
+
+Prediction:
+USA: 60%
+China: 40%
+
+Summary:
+- USA has stronger naval power and global allies.
+- China has higher manpower and resource advantage.
+- Public sentiment is mixed on both sides.
+
+Citations:
+- [Global Firepower 2024](https://www.globalfirepower.com/)
+- [World Bank GDP Data](https://data.worldbank.org/)
