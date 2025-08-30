@@ -32,6 +32,7 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 ## 📂 Project Structure
 - ├── main.py # Orchestrator entrypoint
 - ├── pyproject.toml # Project configuration
+- ├── diagram.png # Project Diagram
 - ├── README.md # Project documentation
 - ├── requirements.txt # Python dependencies
 - ├── tools_agents.py # Agent tools (Tavily search, Military, Economic, Sentiment, etc.)
