@@ -24,6 +24,9 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 
 - **Interactive CLI** – Users provide two countries, and the system outputs a structured prediction.
 
+## Diagram
+[![Conflict Outcome Prediction – System Diagram](diagram.png)](diagram.png)
+
 ---
 
 ## 📂 Project Structure
