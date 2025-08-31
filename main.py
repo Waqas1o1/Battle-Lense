@@ -223,40 +223,38 @@ def calculate_progress(
     return progress
 
 
-async def LoopRunseer(user_input: str, session, progress: float=0):
-    async for event in Runner.run_streamed(
-        RequirementGatheringAgent, user_input, session=session
-    ).stream_events():
-        if event.type == "agent_updated_stream_event":
-            calculate_progress(event.new_agent.name, progress, False)
-        elif event.type == "run_item_stream_event":
-            if event.item.type == "tool_call_item":
-                tool_name = event.item.raw_item.name
-                calculate_progress(tool_name, progress)
-            elif (
-                event.item.type == "message_output_item"
-                and event.item.agent.name == "Prediction Agent"
-            ):
-                final_result = ItemHelpers.text_message_output(event.item)
-                print(final_result)
-                break
-            elif (
-                event.item.type == "message_output_item"
-                and event.item.agent.name == "Requirement Gathering Agent"
-            ):
-                print(ItemHelpers.text_message_output(event.item))
-                _user_input = input("You: ")
-                return await LoopRunseer(_user_input, session, progress) 
 
 
 async def main():
     session = SQLiteSession("conversations.db")
     print("👋 Welcome! Which two countries do you want to compare?")
+    progress =0 
+    _break = False
     while True:
         user_input = input("You: ")
-        await LoopRunseer(user_input, session)
-        break
-
+        async for event in Runner.run_streamed(RequirementGatheringAgent, user_input, session=session).stream_events():
+            if event.type == "agent_updated_stream_event":
+                calculate_progress(event.new_agent.name, progress, False)
+            elif event.type == "run_item_stream_event":
+                if event.item.type == "tool_call_item":
+                    tool_name = event.item.raw_item.name
+                    calculate_progress(tool_name, progress)
+                elif (
+                    event.item.type == "message_output_item"
+                    and event.item.agent.name == "Prediction Agent"
+                ):
+                    final_result = ItemHelpers.text_message_output(event.item)
+                    print(final_result)
+                    _break = True
+                    break
+                elif (
+                    event.item.type == "message_output_item"
+                    and event.item.agent.name == "Requirement Gathering Agent"
+                ):
+                    print(ItemHelpers.text_message_output(event.item))
+                    
+        if _break:
+            break
 
 import asyncio
 
