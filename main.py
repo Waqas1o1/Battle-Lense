@@ -10,6 +10,7 @@ from agents import (
     ModelSettings,
     RunContextWrapper,
     SQLiteSession,
+    ItemHelpers,
 )
 from dotenv import load_dotenv
 from tools_agents import (
@@ -18,7 +19,6 @@ from tools_agents import (
     sentiment_data_Agent,
     ReflectionAgent,
     CitationsAgent,
-    progress_tool_fn
 )
 from agents.extensions.handoff_prompt import RECOMMENDED_PROMPT_PREFIX
 from pydantic import BaseModel, Field
@@ -42,10 +42,7 @@ gimini_llm = OpenAIChatCompletionsModel(
     model="gemini-2.5-flash", openai_client=external_client
 )
 external_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY_2"))
-gpt_llm = OpenAIChatCompletionsModel(
-    model="gpt-4.1", openai_client=external_client
-)
-
+gpt_llm = OpenAIChatCompletionsModel(model="gpt-4.1", openai_client=external_client)
 
 
 instructions = """
@@ -53,8 +50,6 @@ You are the Lead Prediction Agent (Orchestrator).
 Your role is to coordinate the research process and produce a fair, well-reasoned conflict outcome prediction.  
 
 Instructions:  
-- Always keep the user updated about progress using progress_tool_fn. 
-- Before calling each data tool like Military, Economy, Sentiment, call `Progress Tool` with percentage and status.  
 - Call every tool → military_data_agent, economic_data_agent, sentiment_data_agent Agent only one time
 - Call ReflectionAgent and CitationsAgent as many time as you need.
 - Accept structured input from the Planning Agent (countries + research plan).  
@@ -79,19 +74,18 @@ Instructions:
   Country2: 10%
 
 Your goal is to provide the User with a clear, well-structured, and properly sourced prediction report.
-""" 
+"""
 
 prediction_agent = Agent(
     model=gpt_llm,
     name="Prediction Agent",
     instructions=instructions,
     tools=[
-        progress_tool_fn,
         military_data_Agent,
         economic_data_Agent,
         sentiment_data_Agent,
         CitationsAgent,
-        ReflectionAgent
+        ReflectionAgent,
     ],
     model_settings=ModelSettings(temperature=0.2),
 )
@@ -103,15 +97,13 @@ Your job is to receive the countries and share the following research plan for P
 **important** After making plan → handoff to 'Prediction Agent'
 
 Plan:
-Military Data → Collects Global Firepower data.
+1. Military Data → Collects Global Firepower data.
+2. Economy Data → GDP + defense spending comparison.
+3. Sentiment Data → Collects recent news articles, protests, morale analysis.
+4. Reflection → Notes both countries have nukes, so a “decisive victory” is unlikely.
 
-Economy Data → GDP + defense spending comparison.
-
-Sentiment Data → Collects recent news articles, protests, morale analysis.
-
-Reflection → Notes both countries have nukes, so a “decisive victory” is unlikely.
-
-Do Prediction → Outputs:
+Do Prediction → Outputs.
+Now handoff plan to 'Prediction Agent'
 
 """
 
@@ -149,35 +141,124 @@ Rules:
 - When both countries are present, stop asking questions and hand off to the Planning Agent.
 """
 
+
 class RequirementInput(BaseModel):
     country1: str = Field(default=None, description="Name of the first country")
     country2: str = Field(default=None, description="Name of the second country")
 
+
 async def on_handoff(ctx: RunContextWrapper[None], input_data: RequirementInput):
-    return {"country1":input_data.country1,"country2":input_data.country2}
+    return {"country1": input_data.country1, "country2": input_data.country2}
+
 
 RequirementGatheringAgent = Agent(
     model=gpt_llm,
     name="Requirement Gathering Agent",
     instructions=instructions,
     model_settings=ModelSettings(temperature=0.2),
-    handoffs=[handoff(planning_agent,input_type=RequirementInput,on_handoff=on_handoff)],
+    handoffs=[
+        handoff(planning_agent, input_type=RequirementInput, on_handoff=on_handoff)
+    ],
 )
-async def main():
-    session = SQLiteSession("conversations.db") 
 
+PROGRESS_STEPS = {
+    "RequirementGatheringAgent": {
+        "description": "Collecting the two countries for comparison...",
+        "value": 10,
+    },
+    "PlanningAgent": {
+        "description": "Designing the research plan...",
+        "value": 20,
+    },
+    "Prediction Agent": {
+        "description": "Starting the prediction process...",
+        "value": 30,
+    },
+    "military_data_agent": {
+        "description": "Gathering military strength and weapons data...",
+        "value": 45,
+    },
+    "economic_data_agent": {
+        "description": "Collecting economic and resource information...",
+        "value": 60,
+    },
+    "sentiment_data_agent": {
+        "description": "Analyzing public opinion and morale...",
+        "value": 75,
+    },
+    "ReflectionAgent": {
+        "description": "Checking consistency and refining reasoning...",
+        "value": 80,
+    },
+    "CitationsAgent": {
+        "description": "Compiling and verifying sources...",
+        "value": 90,
+    },
+}
+
+
+def calculate_progress(
+    agent_name: str, last_progress: float = 0.0, _print: bool = True
+) -> float:
+    """
+    Given the agent/tool name and last progress,
+    return the updated progress percentage.
+    """
+    progress = last_progress
+    if agent_name in PROGRESS_STEPS:
+        step_info = PROGRESS_STEPS[agent_name]
+        progress = step_info["value"]
+        description = step_info["description"]
+
+    # Reflection and Citations can be called multiple times
+    # so just bump progress slightly without exceeding 95
+    if agent_name in ["ReflectionAgent", "CitationsAgent"]:
+        progress = min(progress + 2, 95)
+    if _print:
+        sys.stdout.flush()
+        sys.stdout.write(
+            f"\r📊 Progress: {progress:.1f}% - {description or f'Running {agent_name}...'}"
+        )
+        sys.stdout.flush()
+    return progress
+
+
+async def LoopRunseer(user_input: str, session, progress: float=0):
+    async for event in Runner.run_streamed(
+        RequirementGatheringAgent, user_input, session=session
+    ).stream_events():
+        if event.type == "agent_updated_stream_event":
+            calculate_progress(event.new_agent.name, progress, False)
+        elif event.type == "run_item_stream_event":
+            if event.item.type == "tool_call_item":
+                tool_name = event.item.raw_item.name
+                calculate_progress(tool_name, progress)
+            elif (
+                event.item.type == "message_output_item"
+                and event.item.agent.name == "Prediction Agent"
+            ):
+                final_result = ItemHelpers.text_message_output(event.item)
+                print(final_result)
+                break
+            elif (
+                event.item.type == "message_output_item"
+                and event.item.agent.name == "Requirement Gathering Agent"
+            ):
+                print(ItemHelpers.text_message_output(event.item))
+                _user_input = input("You: ")
+                return await LoopRunseer(_user_input, session, progress) 
+
+
+async def main():
+    session = SQLiteSession("conversations.db")
     print("👋 Welcome! Which two countries do you want to compare?")
     while True:
         user_input = input("You: ")
-        response = await Runner.run(
-            RequirementGatheringAgent,
-            user_input,
-            session=session 
-        )
-        print("🤖 Agent:", response.final_output)
-        if response.last_agent.name not in ("Requirement Gathering Agent","Planning Agent"):
-            break
+        await LoopRunseer(user_input, session)
+        break
+
 
 import asyncio
+
 if __name__ == "__main__":
     asyncio.run(main())

@@ -38,12 +38,6 @@ class ProgressInput(BaseModel):
     status: str
 
 @function_tool
-def progress_tool_fn(input_data: ProgressInput, ctx):
-    print(f"📊 Progress: {input_data.percentage}% - {input_data.status}")
-    return {"ok": True, "progress": input_data.percentage, "status": input_data.status}
-
-
-@function_tool
 def tavily_search(query: str) -> dict:
     """
     Perform a Tavily search on the internet and return results.
@@ -165,7 +159,6 @@ Guidelines:
     tool_description="Fetches economic and resource capacity data for two countries."
 )
 
-
 sentiment_data_Agent = agent.clone(
     name="Sentiment Data Agent",
     instructions="""
@@ -239,7 +232,6 @@ Tasks:
 
 Do not fetch new information. Only work with the data already provided.
 """
-
 
 ReflectionAgent = agent.clone(
     name="Reflection Agent", instructions=reflection_instructions
