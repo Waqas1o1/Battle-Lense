@@ -76,13 +76,17 @@ uv run main.py
 
 ### Example Interaction
 👋 Welcome! Which two countries do you want to compare?
+
 **You:** IRAN  
+
 Which other country would you like to compare with **IRAN**?  
+
 **You:** PAKISTAN  
 
 --- OR ---
 
 👋 Welcome! Which two countries do you want to compare?
+
 **You:** PAKISTAN AND IRAN
 
 Prediction Agent
