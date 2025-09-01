@@ -87,6 +87,7 @@ Which other country would you like to compare with **IRAN**?
 
 👋 Welcome! Which two countries do you want to compare?
 
+
 **You:** PAKISTAN AND IRAN
 
 Prediction Agent
