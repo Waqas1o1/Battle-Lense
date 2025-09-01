@@ -219,7 +219,6 @@ def calculate_progress(
         sys.stdout.write(
             f"\r📊 Progress: {progress:.1f}% - {description or f'Running {agent_name}...'}"
         )
-        sys.stdout.flush()
     return progress
 
 
@@ -238,6 +237,7 @@ async def main():
             elif event.type == "run_item_stream_event":
                 if event.item.type == "tool_call_item":
                     tool_name = event.item.raw_item.name
+                    print(event.item.agent.name,flush=True)
                     calculate_progress(tool_name, progress)
                 elif (
                     event.item.type == "message_output_item"

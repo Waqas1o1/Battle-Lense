@@ -75,13 +75,27 @@ uv pip install -r requirements.txt
 uv run main.py
 
 ### Example interaction:
-👋 Welcome! Which two countries do you want to compare?
-You: USA and China
-🤖 Agent: Prediction Report generated...
+Which other country would you like to compare with IRAN?
+You: PAKISTAN
+Which other country would you like to compare with PAKISTAN?
+You: IRAN
+--- 
+OR
+---
+Which other country would you like to compare with IRAN?
+You: PAKISTAN AND IRAN
 
-Prediction:
-USA: 60%
-China: 40%
+Prediction Agent
+📊 Progress: 45.0% - Gathering military strength and weapons data...Prediction Agent
+📊 Progress: 60.0% - Collecting economic and resource information...Prediction Agent
+📊 Progress: 75.0% - Analyzing public opinion and morale...Prediction Agent
+📊 Progress: 82.0% - Checking consistency and refining reasoning...Prediction Agent
+📊 Progress: 92.0% - Compiling and verifying sources...Final Prediction Report: Pakistan vs. Iran Conflict Outcome
+
+1. Prediction
+
+Pakistan: 52%
+Iran: 48%
 
 Summary:
 - USA has stronger naval power and global allies.
