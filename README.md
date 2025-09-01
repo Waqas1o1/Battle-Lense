@@ -75,16 +75,14 @@ uv pip install -r requirements.txt
 uv run main.py
 
 ### Example Interaction
-
+👋 Welcome! Which two countries do you want to compare?
+**You:** IRAN  
 Which other country would you like to compare with **IRAN**?  
 **You:** PAKISTAN  
 
-Which other country would you like to compare with **PAKISTAN**?  
-**You:** IRAN  
-
 --- OR ---
 
-Which other country would you like to compare with **IRAN**?  
+👋 Welcome! Which two countries do you want to compare?
 **You:** PAKISTAN AND IRAN
 
 Prediction Agent
