@@ -74,14 +74,18 @@ uv pip install -r requirements.txt
 ## ▶️ Usage
 uv run main.py
 
-### Example interaction
-Which other country would you like to compare with IRAN?
-You: PAKISTAN
-Which other country would you like to compare with PAKISTAN?
-You: IRAN
+### Example Interaction
+
+Which other country would you like to compare with **IRAN**?  
+**You:** PAKISTAN  
+
+Which other country would you like to compare with **PAKISTAN**?  
+**You:** IRAN  
+
 --- OR ---
-Which other country would you like to compare with IRAN?
-You: PAKISTAN AND IRAN
+
+Which other country would you like to compare with **IRAN**?  
+**You:** PAKISTAN AND IRAN
 
 Prediction Agent
 📊 Progress: 45.0% - Gathering military strength and weapons data...Prediction Agent
