@@ -27,6 +27,11 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 ## Diagram
 [![Conflict Outcome Prediction – System Diagram](diagram.png)](diagram.png)
 
+
+## 🎥 Local Video Demo
+You can watch the demo video here:  
+[▶️ Watch Demo](demo.mp4)
+
 ---
 
 ## 📂 Project Structure
