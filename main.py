@@ -22,6 +22,10 @@ from tools_agents import (
 )
 from agents.extensions.handoff_prompt import RECOMMENDED_PROMPT_PREFIX
 from pydantic import BaseModel, Field
+from reports import generate_report, save_report
+from datetime import datetime
+from pathlib import Path
+
 
 if sys.platform.startswith("win"):
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -106,7 +110,6 @@ Do Prediction → Outputs.
 Now handoff plan to 'Prediction Agent'
 
 """
-
 
 planning_agent = Agent(
     model=gimini_llm,
@@ -222,29 +225,28 @@ def calculate_progress(
     return progress
 
 
-
-
 async def main():
     session = SQLiteSession("conversations.db")
     print("👋 Welcome! Which two countries do you want to compare?")
-    progress =0 
+    progress = 0
     _break = False
     while True:
         user_input = input("You: ")
-        async for event in Runner.run_streamed(RequirementGatheringAgent, user_input, session=session).stream_events():
+        async for event in Runner.run_streamed(
+            RequirementGatheringAgent, user_input, session=session
+        ).stream_events():
             if event.type == "agent_updated_stream_event":
                 calculate_progress(event.new_agent.name, progress, False)
             elif event.type == "run_item_stream_event":
                 if event.item.type == "tool_call_item":
                     tool_name = event.item.raw_item.name
-                    print(event.item.agent.name,flush=True)
+                    print(event.item.agent.name, flush=True)
                     calculate_progress(tool_name, progress)
                 elif (
                     event.item.type == "message_output_item"
                     and event.item.agent.name == "Prediction Agent"
                 ):
                     final_result = ItemHelpers.text_message_output(event.item)
-                    print(final_result)
                     _break = True
                     break
                 elif (
@@ -252,9 +254,49 @@ async def main():
                     and event.item.agent.name == "Requirement Gathering Agent"
                 ):
                     print(ItemHelpers.text_message_output(event.item))
-                    
+
         if _break:
             break
+
+    if final_result:
+        print("\n🔄 Generating report...")
+
+        try:
+            report = await generate_report(session, final_result, user_input)
+            json_file, txt_file = save_report(report)
+
+            print(f"✅ Report generated successfully!")
+            print(f"📄 Text report saved: {txt_file}")
+            print(f"📊 JSON report saved: {json_file}")
+
+            # Optionally display a summary
+            print(f"\n📋 Report Summary:")
+            print(f"   - Generated at: {report['metadata']['timestamp']}")
+            print(f"   - Query analyzed: {report['metadata']['user_query']}")
+            print(f"   - Report files created in: reports/")
+
+        except Exception as e:
+            print(f"❌ Error generating report: {e}")
+            # Fallback: save just the result
+            try:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                fallback_file = Path("reports") / f"analysis_result_{timestamp}.txt"
+                Path("reports").mkdir(exist_ok=True)
+
+                with open(fallback_file, "w", encoding="utf-8") as f:
+                    f.write(
+                        f"Analysis Result - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    )
+                    f.write("=" * 50 + "\n\n")
+                    f.write(f"User Query: {user_input}\n\n")
+                    f.write(f"Result:\n{final_result}")
+
+                print(f"📄 Fallback report saved: {fallback_file}")
+            except Exception as fallback_error:
+                print(f"❌ Failed to save fallback report: {fallback_error}")
+
+    print("\n👋 Thank you for using the country comparison tool!")
+
 
 import asyncio
 
