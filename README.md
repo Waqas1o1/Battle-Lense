@@ -6,6 +6,7 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 ---
 
 ## 🚀 Features
+
 - **Multi-Agent Architecture**:
   - 📊 **Requirement Gathering Agent** – Collects countries for comparison.  
   - 🗺 **Planning Agent** – Generates a structured research plan.  
@@ -24,29 +25,32 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
 
 - **Interactive CLI** – Users provide two countries, and the system outputs a structured prediction.
 
-## Diagram
-[![Conflict Outcome Prediction – System Diagram](diagram.png)](diagram.png)
+## 📊 System Diagram
 
+[![Conflict Outcome Prediction – System Diagram](diagram.png)](diagram.png)
 
 ## 🎥 Video Demo
 
-[![Watch Demo](diagram.png)](https://drive.google.com/file/d/1_OX3mBSMCwwmmpRght5PZyYnH4Pl1wLX/view?usp=drive_link)
-
+[![Watch Demo](https://img.shields.io/badge/▶️-Watch%20Demo-red?style=for-the-badge)](https://drive.google.com/file/d/1_OX3mBSMCwwmmpRght5PZyYnH4Pl1wLX/view?usp=drive_link)
 
 ---
 
 ## 📂 Project Structure
-- ├── main.py # Orchestrator entrypoint
-- ├── pyproject.toml # Project configuration
-- ├── diagram.png # Project Diagram
-- ├── README.md # Project documentation
-- ├── requirements.txt # Python dependencies
-- ├── tools_agents.py # Agent tools (Tavily search, Military, Economic, Sentiment, etc.)
-- └── uv # UV package manager config
+
+```
+├── main.py                 # Orchestrator entrypoint
+├── pyproject.toml          # Project configuration
+├── diagram.png             # Project diagram
+├── README.md               # Project documentation
+├── requirements.txt        # Python dependencies
+├── tools_agents.py         # Agent tools (Tavily search, Military, Economic, Sentiment, etc.)
+└── uv/                     # UV package manager config
+```
 
 ---
 
 ## 🔑 Requirements
+
 - Python **3.9+**
 - Dependencies:
   - `openai>=1.100.2`
@@ -55,64 +59,110 @@ It leverages **LLMs (OpenAI GPT + Google Gemini)**, **Tavily Search API**, and a
   - `ruff>=0.12.9`
   - `tavily-python>=0.7.11`
 
-(Already listed in `pyproject.toml`)
+*(Dependencies are listed in `pyproject.toml`)*
 
 ---
 
 ## ⚙️ Setup
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Waqas1o1/Battle-Lense.git
-   cd conflict-prediction-system
+### 1. Clone the repository
 
-2. **Install dependencies**
+```bash
+git clone https://github.com/Waqas1o1/Battle-Lense.git
+cd Battle-Lense
+```
+
+### 2. Install dependencies
+
+```bash
 pip install uv
 uv pip install -r requirements.txt
+```
 
+### 3. Setup environment variables
 
-3. **Setup environment variables**
-- OPENAI_API_KEY=your_openai_key
-- OPENAI_API_KEY_2=your_secondary_openai_key
-- GEMINI_API_KEY=your_google_gemini_key
-- TAVILY_API_KEY=your_tavily_api_key
+Create a `.env` file in the project root:
+
+```env
+OPENAI_API_KEY=your_openai_key
+OPENAI_API_KEY_2=your_secondary_openai_key
+GEMINI_API_KEY=your_google_gemini_key
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+---
 
 ## ▶️ Usage
+
+```bash
 uv run main.py
+```
 
 ### Example Interaction
+
+**Option 1: Enter countries separately**
+```
 👋 Welcome! Which two countries do you want to compare?
 
-**You:** IRAN  
+You: IRAN  
 
-Which other country would you like to compare with **IRAN**?  
+Which other country would you like to compare with IRAN?  
 
-**You:** PAKISTAN  
+You: PAKISTAN  
+```
 
---- OR ---
-
+**Option 2: Enter both countries at once**
+```
 👋 Welcome! Which two countries do you want to compare?
 
+You: PAKISTAN AND IRAN
+```
 
-**You:** PAKISTAN AND IRAN
+### Sample Output
+
+```
+Prediction Agent
+📊 Progress: 45.0% - Gathering military strength and weapons data...
 
 Prediction Agent
-📊 Progress: 45.0% - Gathering military strength and weapons data...Prediction Agent
-📊 Progress: 60.0% - Collecting economic and resource information...Prediction Agent
-📊 Progress: 75.0% - Analyzing public opinion and morale...Prediction Agent
-📊 Progress: 82.0% - Checking consistency and refining reasoning...Prediction Agent
-📊 Progress: 92.0% - Compiling and verifying sources...Final Prediction Report: Pakistan vs. Iran Conflict Outcome
+📊 Progress: 60.0% - Collecting economic and resource information...
 
-1. Prediction
+Prediction Agent
+📊 Progress: 75.0% - Analyzing public opinion and morale...
+
+Prediction Agent
+📊 Progress: 82.0% - Checking consistency and refining reasoning...
+
+Prediction Agent
+📊 Progress: 92.0% - Compiling and verifying sources...
+
+Final Prediction Report: Pakistan vs. Iran Conflict Outcome
+
+🎯 Prediction
 
 Pakistan: 52%
 Iran: 48%
 
-Summary:
-- USA has stronger naval power and global allies.
-- China has higher manpower and resource advantage.
-- Public sentiment is mixed on both sides.
+📋 Summary:
+- Pakistan has stronger naval power and regional allies
+- Iran has higher defense spending and resource advantage
+- Public sentiment analysis shows mixed results on both sides
 
-Citations:
+📚 Citations:
 - [Global Firepower 2024](https://www.globalfirepower.com/)
 - [World Bank GDP Data](https://data.worldbank.org/)
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## ⚖️ Disclaimer
+
+This tool is designed for educational and analytical purposes only. It should not be used to promote or encourage actual conflicts between nations.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
